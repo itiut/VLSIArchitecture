@@ -6,9 +6,9 @@ module IF(input clk_in,
           output reg [31:0] IFID_ir_out);
 
     reg [31:0] pc;
-    reg [31:0] ins_mem[0:10];
+    reg [31:0] ins_mem[0:255];
 
-    initial $readmemb("memory.bnr", ins_mem);
+    initial $readmemb("ins_mem.bnr", ins_mem);
 
     wire [31:0] next_pc_out;
     wire [31:0] next_pc_plus4;
