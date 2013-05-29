@@ -1,103 +1,103 @@
 `include "header.v"
 
-module EX(input clk_in,
-          input n_rst_in,
-          input [31:0] IDEX_pc_in,
-          input [31:0] IDEX_ir_in,
-          input [31:0] IDEX_a_in,
-          input [31:0] IDEX_b_in,
-          input IDEX_ctrl_reg_dst_in,
-          input IDEX_ctrl_alu_src_in,
-          input IDEX_ctrl_branch_in,
-          input [1:0] IDEX_ctrl_mem_read_in,
-          input [1:0] IDEX_ctrl_mem_write_in,
-          input IDEX_ctrl_reg_write_in,
-          input IDEX_ctrl_mem_to_reg_in,
-          input [4:0] MEMWB_rd_in,
-          output reg [31:0] EXMEM_pc_branch_out,
-          output reg [31:0] EXMEM_alu_out,
-          output reg EXMEM_alu_do_branch_out,
-          output reg [31:0] EXMEM_b_out,
-          output reg [4:0] EXMEM_rd_out,
-          output reg EXMEM_ctrl_branch_out,
-          output reg [1:0] EXMEM_ctrl_mem_read_out,
-          output reg [1:0] EXMEM_ctrl_mem_write_out,
-          output reg EXMEM_ctrl_reg_write_out,
-          output reg EXMEM_ctrl_mem_to_reg_out);
+module EX(input clk_i,
+          input n_rst_i,
+          input [31:0] IDEX_pc_i,
+          input [31:0] IDEX_ir_i,
+          input [31:0] IDEX_a_i,
+          input [31:0] IDEX_b_i,
+          input IDEX_ctrl_reg_dst_i,
+          input IDEX_ctrl_alu_src_i,
+          input IDEX_ctrl_branch_i,
+          input [1:0] IDEX_ctrl_mem_read_i,
+          input [1:0] IDEX_ctrl_mem_write_i,
+          input IDEX_ctrl_reg_write_i,
+          input IDEX_ctrl_mem_to_reg_i,
+          input [4:0] MEMWB_rd_i,
+          output reg [31:0] EXMEM_pc_branch_o,
+          output reg [31:0] EXMEM_alu_o,
+          output reg EXMEM_alu_do_branch_o,
+          output reg [31:0] EXMEM_b_o,
+          output reg [4:0] EXMEM_rd_o,
+          output reg EXMEM_ctrl_branch_o,
+          output reg [1:0] EXMEM_ctrl_mem_read_o,
+          output reg [1:0] EXMEM_ctrl_mem_write_o,
+          output reg EXMEM_ctrl_reg_write_o,
+          output reg EXMEM_ctrl_mem_to_reg_o);
 
-    wire [5:0] op;
-    wire [4:0] rs;
-    wire [4:0] rt;
-    wire [4:0] rd;
-    wire [4:0] shift;
-    wire [4:0] aux;
-    wire [31:0] imm_dpl;
-    wire [25:0] addr;
+    wire [5:0] _op;
+    wire [4:0] _rs;
+    wire [4:0] _rt;
+    wire [4:0] _rd;
+    wire [4:0] _shift;
+    wire [4:0] _aux;
+    wire [31:0] _imm_dpl;
+    wire [25:0] _addr;
 
-    assign op = IDEX_ir_in[31:26];
-    assign rs = IDEX_ir_in[25:21];
-    assign rt = IDEX_ir_in[20:16];
-    assign rd = IDEX_ir_in[15:11];
-    assign shift = IDEX_ir_in[10:6];
-    assign aux = IDEX_ir_in[4:0];
-    assign imm_dpl = {{16{IDEX_ir_in[15]}}, IDEX_ir_in[15:0]};
-    assign addr = IDEX_ir_in[25:0];
+    assign _op = IDEX_ir_i[31:26];
+    assign _rs = IDEX_ir_i[25:21];
+    assign _rt = IDEX_ir_i[20:16];
+    assign _rd = IDEX_ir_i[15:11];
+    assign _shift = IDEX_ir_i[10:6];
+    assign _aux = IDEX_ir_i[4:0];
+    assign _imm_dpl = {{16{IDEX_ir_i[15]}}, IDEX_ir_i[15:0]};
+    assign _addr = IDEX_ir_i[25:0];
 
-    wire [31:0] a;
-    wire [31:0] b;
-    wire [31:0] alu_out;
-    wire alu_zero;
-    wire alu_sign;
-    wire alu_do_branch_out;
+    wire [31:0] _a;
+    wire [31:0] _b;
+    wire [31:0] _alu;
+    wire _alu_zero;
+    wire _alu_sign;
+    wire _alu_do_branch;
 
-    assign a = alu_a(IDEX_a_in);
-    assign b = alu_b(IDEX_b_in, imm_dpl, IDEX_ctrl_alu_src_in);
-    assign alu_out = (op == `OP_LUI) ? (imm_dpl << 16) :
-                     (op == `OP_JAL) ? IDEX_pc_in :
-                     alu(alu_ctrl(op, aux),
-                         a,
-                         b,
-                         shift);
-    assign alu_zero = ~|alu_out;
-    assign alu_sign = alu_out[31];
-    assign alu_do_branch_out = alu_do_branch(op,
-                                             alu_zero,
-                                             alu_sign);
+    assign _a = alu_a(IDEX_a_i);
+    assign _b = alu_b(IDEX_b_i, _imm_dpl, IDEX_ctrl_alu_src_i);
+    assign _alu = (_op == `OP_LUI) ? (_imm_dpl << 16) :
+                  (_op == `OP_JAL) ? IDEX_pc_i :
+                  alu(alu_ctrl(_op, _aux),
+                      _a,
+                      _b,
+                      _shift);
+    assign _alu_zero = ~|_alu;
+    assign _alu_sign = _alu[31];
+    assign _alu_do_branch = alu_do_branch(_op,
+                                          _alu_zero,
+                                          _alu_sign);
 
-    wire [31:0] pc_branch_out;
-    assign pc_branch_out = pc_branch(op,
-                                     IDEX_pc_in,
-                                     imm_dpl,
-                                     addr,
-                                     a);
+    wire [31:0] _pc_branch;
+    assign _pc_branch = pc_branch(_op,
+                                  IDEX_pc_i,
+                                  _imm_dpl,
+                                  _addr,
+                                  _a);
 
-    wire [4:0] rd_out;
-    assign rd_out = (op == `OP_JAL) ? 5'd31 :
-                    (IDEX_ctrl_reg_dst_in) ? rd : rt;
+    wire [4:0] _rd_out;
+    assign _rd_out = (_op == `OP_JAL) ? 5'd31 :
+                     (IDEX_ctrl_reg_dst_i) ? _rd : _rt;
 
-    always @(negedge n_rst_in or posedge clk_in) begin
-        if (~n_rst_in) begin
-            EXMEM_pc_branch_out <= 0;
-            EXMEM_alu_out <= 0;
-            EXMEM_alu_do_branch_out <= 0;
-            EXMEM_b_out <= 0;
-            EXMEM_rd_out <= 0;
-            EXMEM_ctrl_branch_out <= 0;
-            EXMEM_ctrl_mem_read_out <= 0;
-            EXMEM_ctrl_mem_write_out <= 0;
-            EXMEM_ctrl_reg_write_out <= 0;
-            EXMEM_ctrl_mem_to_reg_out <= 0;
-        end else if (clk_in) begin
-            EXMEM_pc_branch_out <= pc_branch_out;
-            EXMEM_alu_out <= alu_out;
-            EXMEM_alu_do_branch_out <= alu_do_branch_out;
-            EXMEM_b_out <= IDEX_b_in;
-            EXMEM_rd_out <= rd_out;
-            EXMEM_ctrl_branch_out <= IDEX_ctrl_branch_in;
-            EXMEM_ctrl_mem_read_out <= IDEX_ctrl_mem_read_in;
-            EXMEM_ctrl_mem_write_out <= IDEX_ctrl_mem_write_in;
-            EXMEM_ctrl_reg_write_out <= IDEX_ctrl_reg_write_in;
-            EXMEM_ctrl_mem_to_reg_out <= IDEX_ctrl_mem_to_reg_in;
+    always @(negedge n_rst_i or posedge clk_i) begin
+        if (~n_rst_i) begin
+            EXMEM_pc_branch_o <= 0;
+            EXMEM_alu_o <= 0;
+            EXMEM_alu_do_branch_o <= 0;
+            EXMEM_b_o <= 0;
+            EXMEM_rd_o <= 0;
+            EXMEM_ctrl_branch_o <= 0;
+            EXMEM_ctrl_mem_read_o <= 0;
+            EXMEM_ctrl_mem_write_o <= 0;
+            EXMEM_ctrl_reg_write_o <= 0;
+            EXMEM_ctrl_mem_to_reg_o <= 0;
+        end else if (clk_i) begin
+            EXMEM_pc_branch_o <= _pc_branch;
+            EXMEM_alu_o <= _alu;
+            EXMEM_alu_do_branch_o <= _alu_do_branch;
+            EXMEM_b_o <= IDEX_b_i;
+            EXMEM_rd_o <= _rd_out;
+            EXMEM_ctrl_branch_o <= IDEX_ctrl_branch_i;
+            EXMEM_ctrl_mem_read_o <= IDEX_ctrl_mem_read_i;
+            EXMEM_ctrl_mem_write_o <= IDEX_ctrl_mem_write_i;
+            EXMEM_ctrl_reg_write_o <= IDEX_ctrl_reg_write_i;
+            EXMEM_ctrl_mem_to_reg_o <= IDEX_ctrl_mem_to_reg_i;
         end
     end
 

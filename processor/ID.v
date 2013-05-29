@@ -1,139 +1,139 @@
 `include "header.v"
 
-module ID(input clk_in,
-          input n_rst_in,
-          input [31:0] IFID_pc_in,
-          input [31:0] IFID_ir_in,
-          input [4:0] WB_reg_write_address_in,
-          input [31:0] WB_reg_write_data_in,
-          input WB_ctrl_reg_write_in,
-          output reg [31:0] IDEX_pc_out,
-          output reg [31:0] IDEX_ir_out,
-          output reg [31:0] IDEX_a_out,
-          output reg [31:0] IDEX_b_out,
-          output reg IDEX_ctrl_reg_dst_out,
-          output reg IDEX_ctrl_alu_src_out,
-          output reg IDEX_ctrl_branch_out,
-          output reg [1:0] IDEX_ctrl_mem_read_out,  // word, half-word, byte
-          output reg [1:0] IDEX_ctrl_mem_write_out, // word, half-word, byte
-          output reg IDEX_ctrl_reg_write_out,
-          output reg IDEX_ctrl_mem_to_reg_out);
+module ID(input clk_i,
+          input n_rst_i,
+          input [31:0] IFID_pc_i,
+          input [31:0] IFID_ir_i,
+          input [4:0] WB_reg_write_address_i,
+          input [31:0] WB_reg_write_data_i,
+          input WB_ctrl_reg_write_i,
+          output reg [31:0] IDEX_pc_o,
+          output reg [31:0] IDEX_ir_o,
+          output reg [31:0] IDEX_a_o,
+          output reg [31:0] IDEX_b_o,
+          output reg IDEX_ctrl_reg_dst_o,
+          output reg IDEX_ctrl_alu_src_o,
+          output reg IDEX_ctrl_branch_o,
+          output reg [1:0] IDEX_ctrl_mem_read_o,  // word, half-word, byte
+          output reg [1:0] IDEX_ctrl_mem_write_o, // word, half-word, byte
+          output reg IDEX_ctrl_reg_write_o,
+          output reg IDEX_ctrl_mem_to_reg_o);
 
-    wire [4:0] rs;
-    wire [4:0] rt;
-    wire [31:0] reg_read_data1;
-    wire [31:0] reg_read_data2;
+    wire [4:0] _rs;
+    wire [4:0] _rt;
+    wire [31:0] _reg_read_data1;
+    wire [31:0] _reg_read_data2;
 
-    assign rs = IFID_ir_in[25:21];
-    assign rt = IFID_ir_in[20:16];
+    assign _rs = IFID_ir_i[25:21];
+    assign _rt = IFID_ir_i[20:16];
 
-    register register(.clk_in(clk_in),
-                      .n_rst_in(n_rst_in),
-                      .read_address1_in(rs),
-                      .read_address2_in(rt),
-                      .write_address_in(WB_reg_write_address_in),
-                      .write_data_in(WB_reg_write_data_in),
-                      .ctrl_reg_write_in(WB_ctrl_reg_write_in),
-                      .read_data1_out(reg_read_data1),
-                      .read_data2_out(reg_read_data2));
+    register register(.clk_i(clk_i),
+                      .n_rst_i(n_rst_i),
+                      .read_address1_i(_rs),
+                      .read_address2_i(_rt),
+                      .write_address_i(WB_reg_write_address_i),
+                      .write_data_i(WB_reg_write_data_i),
+                      .ctrl_reg_write_i(WB_ctrl_reg_write_i),
+                      .read_data1_o(_reg_read_data1),
+                      .read_data2_o(_reg_read_data2));
 
-    wire ctrl_reg_dst;
-    wire ctrl_alu_src;
-    wire ctrl_branch;
-    wire [1:0] ctrl_mem_read;
-    wire [1:0] ctrl_mem_write;
-    wire ctrl_reg_write;
-    wire ctrl_mem_to_reg;
+    wire _ctrl_reg_dst;
+    wire _ctrl_alu_src;
+    wire _ctrl_branch;
+    wire [1:0] _ctrl_mem_read;
+    wire [1:0] _ctrl_mem_write;
+    wire _ctrl_reg_write;
+    wire _ctrl_mem_to_reg;
 
-    control_unit control_unit(.ir_in(IFID_ir_in),
-                              .reg_dst_out(ctrl_reg_dst),
-                              .alu_src_out(ctrl_alu_src),
-                              .branch_out(ctrl_branch),
-                              .mem_read_out(ctrl_mem_read),
-                              .mem_write_out(ctrl_mem_write),
-                              .reg_write_out(ctrl_reg_write),
-                              .mem_to_reg_out(ctrl_mem_to_reg));
+    control_unit control_unit(.ir_i(IFID_ir_i),
+                              .reg_dst_o(_ctrl_reg_dst),
+                              .alu_src_o(_ctrl_alu_src),
+                              .branch_o(_ctrl_branch),
+                              .mem_read_o(_ctrl_mem_read),
+                              .mem_write_o(_ctrl_mem_write),
+                              .reg_write_o(_ctrl_reg_write),
+                              .mem_to_reg_o(_ctrl_mem_to_reg));
 
-    always @(negedge n_rst_in or posedge clk_in) begin
-        if (~n_rst_in) begin
-            IDEX_pc_out <= 0;
-            IDEX_ir_out <= 0;
-            IDEX_a_out <= 0;
-            IDEX_b_out <= 0;
-            IDEX_ctrl_reg_dst_out <= 0;
-            IDEX_ctrl_alu_src_out <= 0;
-            IDEX_ctrl_branch_out <= 0;
-            IDEX_ctrl_mem_read_out <= 0;
-            IDEX_ctrl_mem_write_out <= 0;
-            IDEX_ctrl_reg_write_out <= 0;
-            IDEX_ctrl_mem_to_reg_out <= 0;
-        end else if (clk_in) begin
-            IDEX_pc_out <= IFID_pc_in;
-            IDEX_ir_out <= IFID_ir_in;
-            IDEX_ctrl_reg_dst_out <= ctrl_reg_dst;
-            IDEX_ctrl_alu_src_out <= ctrl_alu_src;
-            IDEX_ctrl_branch_out <= ctrl_branch;
-            IDEX_ctrl_mem_read_out <= ctrl_mem_read;
-            IDEX_ctrl_mem_write_out <= ctrl_mem_write;
-            IDEX_ctrl_reg_write_out <= ctrl_reg_write;
-            IDEX_ctrl_mem_to_reg_out <= ctrl_mem_to_reg;
+    always @(negedge n_rst_i or posedge clk_i) begin
+        if (~n_rst_i) begin
+            IDEX_pc_o <= 0;
+            IDEX_ir_o <= 0;
+            IDEX_a_o <= 0;
+            IDEX_b_o <= 0;
+            IDEX_ctrl_reg_dst_o <= 0;
+            IDEX_ctrl_alu_src_o <= 0;
+            IDEX_ctrl_branch_o <= 0;
+            IDEX_ctrl_mem_read_o <= 0;
+            IDEX_ctrl_mem_write_o <= 0;
+            IDEX_ctrl_reg_write_o <= 0;
+            IDEX_ctrl_mem_to_reg_o <= 0;
+        end else if (clk_i) begin
+            IDEX_pc_o <= IFID_pc_i;
+            IDEX_ir_o <= IFID_ir_i;
+            IDEX_ctrl_reg_dst_o <= _ctrl_reg_dst;
+            IDEX_ctrl_alu_src_o <= _ctrl_alu_src;
+            IDEX_ctrl_branch_o <= _ctrl_branch;
+            IDEX_ctrl_mem_read_o <= _ctrl_mem_read;
+            IDEX_ctrl_mem_write_o <= _ctrl_mem_write;
+            IDEX_ctrl_reg_write_o <= _ctrl_reg_write;
+            IDEX_ctrl_mem_to_reg_o <= _ctrl_mem_to_reg;
         end
     end
 
-    always @(negedge clk_in) begin
-        IDEX_a_out <= reg_read_data1;
-        IDEX_b_out <= reg_read_data2;
+    always @(negedge clk_i) begin
+        IDEX_a_o <= _reg_read_data1;
+        IDEX_b_o <= _reg_read_data2;
     end
 
 endmodule
 
-module register(input clk_in,
-                input n_rst_in,
-                input [4:0] read_address1_in,
-                input [4:0] read_address2_in,
-                input [4:0] write_address_in,
-                input [31:0] write_data_in,
-                input ctrl_reg_write_in,
-                output [31:0] read_data1_out,
-                output [31:0] read_data2_out);
+module register(input clk_i,
+                input n_rst_i,
+                input [4:0] read_address1_i,
+                input [4:0] read_address2_i,
+                input [4:0] write_address_i,
+                input [31:0] write_data_i,
+                input ctrl_reg_write_i,
+                output [31:0] read_data1_o,
+                output [31:0] read_data2_o);
 
-    reg [31:0] regs[0:31];
+    reg [31:0] _regs[0:31];
 
-    assign read_data1_out = regs[read_address1_in];
-    assign read_data2_out = regs[read_address2_in];
+    assign read_data1_o = _regs[read_address1_i];
+    assign read_data2_o = _regs[read_address2_i];
 
-    always @(negedge n_rst_in) begin
-        regs[0] <= 0;
+    always @(negedge n_rst_i) begin
+        _regs[0] <= 0;
     end
 
     // TODO: neg or pos clk?
-    always @(negedge clk_in) begin
-        if (ctrl_reg_write_in) begin
-            regs[write_address_in] <= write_data_in;
+    always @(negedge clk_i) begin
+        if (ctrl_reg_write_i) begin
+            _regs[write_address_i] <= write_data_i;
         end
     end
 
 endmodule
 
-module control_unit(input [31:0] ir_in,
-                    output reg_dst_out,
-                    output alu_src_out,
-                    output branch_out,
-                    output [1:0] mem_read_out,
-                    output [1:0] mem_write_out,
-                    output reg_write_out,
-                    output mem_to_reg_out);
+module control_unit(input [31:0] ir_i,
+                    output reg_dst_o,
+                    output alu_src_o,
+                    output branch_o,
+                    output [1:0] mem_read_o,
+                    output [1:0] mem_write_o,
+                    output reg_write_o,
+                    output mem_to_reg_o);
 
-    wire [5:0] op;
-    assign op = ir_in[31:26];
+    wire [5:0] _op;
+    assign _op = ir_i[31:26];
 
-    assign reg_dst_out = (op == `OP_R);
-    assign alu_src_out = alu_src(op);
-    assign branch_out = branch(op);
-    assign mem_read_out = mem_read(op);
-    assign mem_write_out = mem_write(op);
-    assign reg_write_out = reg_write(op);
-    assign mem_to_reg_out = mem_to_reg(op);
+    assign reg_dst_o = (_op == `OP_R);
+    assign alu_src_o = alu_src(_op);
+    assign branch_o = branch(_op);
+    assign mem_read_o = mem_read(_op);
+    assign mem_write_o = mem_write(_op);
+    assign reg_write_o = reg_write(_op);
+    assign mem_to_reg_o = mem_to_reg(_op);
 
     function alu_src;
         input [5:0] op;

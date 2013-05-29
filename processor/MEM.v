@@ -1,74 +1,74 @@
 `include "header.v"
 
-module MEM(input clk_in,
-           input n_rst_in,
-           input [31:0] EXMEM_pc_branch_in,
-           input [31:0] EXMEM_alu_in,
-           input EXMEM_alu_do_branch_in,
-           input [31:0] EXMEM_b_in,
-           input [4:0] EXMEM_rd_in,
-           input EXMEM_ctrl_branch_in,
-           input [1:0] EXMEM_ctrl_mem_read_in,
-           input [1:0] EXMEM_ctrl_mem_write_in,
-           input EXMEM_ctrl_reg_write_in,
-           input EXMEM_ctrl_mem_to_reg_in,
-           output reg [31:0] MEMWB_mem_out,
-           output reg [31:0] MEMWB_alu_out,
-           output reg [4:0] MEMWB_rd_out,
-           output reg MEMWB_ctrl_reg_write_out,
-           output reg MEMWB_ctrl_mem_to_reg_out,
-           output [31:0] MEM_pc_branch_out,
-           output MEM_ctrl_pc_src_out);
+module MEM(input clk_i,
+           input n_rst_i,
+           input [31:0] EXMEM_pc_branch_i,
+           input [31:0] EXMEM_alu_i,
+           input EXMEM_alu_do_branch_i,
+           input [31:0] EXMEM_b_i,
+           input [4:0] EXMEM_rd_i,
+           input EXMEM_ctrl_branch_i,
+           input [1:0] EXMEM_ctrl_mem_read_i,
+           input [1:0] EXMEM_ctrl_mem_write_i,
+           input EXMEM_ctrl_reg_write_i,
+           input EXMEM_ctrl_mem_to_reg_i,
+           output reg [31:0] MEMWB_mem_o,
+           output reg [31:0] MEMWB_alu_o,
+           output reg [4:0] MEMWB_rd_o,
+           output reg MEMWB_ctrl_reg_write_o,
+           output reg MEMWB_ctrl_mem_to_reg_o,
+           output [31:0] MEM_pc_branch_o,
+           output MEM_ctrl_pc_src_o);
 
-    assign MEM_ctrl_pc_src_out = (EXMEM_ctrl_branch_in & EXMEM_alu_do_branch_in);
+    assign MEM_ctrl_pc_src_o = (EXMEM_ctrl_branch_i & EXMEM_alu_do_branch_i);
 
-    wire [31:0] mem_read_data;
+    wire [31:0] _mem_read_data;
 
-    memory memory(.clk_in(clk_in),
-                  .address_in(EXMEM_alu_in[7:0]),
-                  .write_data_in(EXMEM_b_in),
-                  .ctrl_mem_read_in(EXMEM_ctrl_mem_read_in),
-                  .ctrl_mem_write_in(EXMEM_ctrl_mem_write_in),
-                  .read_data_out(mem_read_data));
+    memory memory(.clk_i(clk_i),
+                  .address_i(EXMEM_alu_i[7:0]),
+                  .write_data_i(EXMEM_b_i),
+                  .ctrl_mem_read_i(EXMEM_ctrl_mem_read_i),
+                  .ctrl_mem_write_i(EXMEM_ctrl_mem_write_i),
+                  .read_data_o(_mem_read_data));
 
-    always @(negedge n_rst_in or posedge clk_in) begin
-        if (~n_rst_in) begin
-            MEMWB_alu_out <= 0;
-            MEMWB_mem_out <= 0;
-            MEMWB_rd_out <= 0;
-            MEMWB_ctrl_reg_write_out <= 0;
-            MEMWB_ctrl_mem_to_reg_out <= 0;
-        end else if (clk_in) begin
-            MEMWB_alu_out <= EXMEM_alu_in;
-            MEMWB_rd_out <= EXMEM_rd_in;
-            MEMWB_ctrl_reg_write_out <= EXMEM_ctrl_reg_write_in;
-            MEMWB_ctrl_mem_to_reg_out <= EXMEM_ctrl_mem_to_reg_in;
+    always @(negedge n_rst_i or posedge clk_i) begin
+        if (~n_rst_i) begin
+            MEMWB_alu_o <= 0;
+            MEMWB_mem_o <= 0;
+            MEMWB_rd_o <= 0;
+            MEMWB_ctrl_reg_write_o <= 0;
+            MEMWB_ctrl_mem_to_reg_o <= 0;
+        end else if (clk_i) begin
+            MEMWB_alu_o <= EXMEM_alu_i;
+            MEMWB_rd_o <= EXMEM_rd_i;
+            MEMWB_ctrl_reg_write_o <= EXMEM_ctrl_reg_write_i;
+            MEMWB_ctrl_mem_to_reg_o <= EXMEM_ctrl_mem_to_reg_i;
         end
     end
 
-    always @(negedge clk_in) begin
-        MEMWB_mem_out <= mem_read_data;
+    always @(negedge clk_i) begin
+        MEMWB_mem_o <= _mem_read_data;
     end
 
 endmodule
 
-module memory(input clk_in,
-              input [7:0] address_in,
-              input [31:0] write_data_in,
-              input [1:0] ctrl_mem_read_in,
-              input [1:0] ctrl_mem_write_in,
-              output [31:0] read_data_out);
+module memory(input clk_i,
+              input [7:0] address_i,
+              input [31:0] write_data_i,
+              input [1:0] ctrl_mem_read_i,
+              input [1:0] ctrl_mem_write_i,
+              output [31:0] read_data_o);
 
-    reg [31:0] mem[0:255];
+    reg [31:0] _mem[0:255];
 
-    assign read_data_out = read(mem[address_in], ctrl_mem_read_in);
+    assign read_data_o = read(_mem[address_i], ctrl_mem_read_i);
 
     // TODO: neg or pos clk?
-    always @(negedge clk_in) begin
-        case (ctrl_mem_write_in)
-            `WORD: mem[address_in] <= write_data_in;
-            `HALFWORD: mem[address_in][15:0] <= write_data_in[15:0];
-            `BYTE: mem[address_in][7:0] <= write_data_in[7:0];
+    always @(negedge clk_i) begin
+        case (ctrl_mem_write_i)
+            `WORD: _mem[address_i] <= write_data_i;
+            `HALFWORD: _mem[address_i][15:0] <= write_data_i[15:0];
+            `BYTE: _mem[address_i][7:0] <= write_data_i[7:0];
         endcase
     end
 
