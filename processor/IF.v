@@ -15,8 +15,8 @@ module IF(input clk_i,
     wire [31:0] _ins;
 
     assign _next_pc = next_pc(IFID_pc_o,
-                                 MEM_pc_branch_i,
-                                 MEM_ctrl_pc_src_i);
+                              MEM_pc_branch_i,
+                              MEM_ctrl_pc_src_i);
     assign _next_pc_plus4 = _next_pc + 4;
     assign _ins = _ins_mem[_next_pc >> 2];
 
