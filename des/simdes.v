@@ -20,6 +20,7 @@ module simdes;
         #20     keyin = 0;
         #20     datin = 1;
         #20     datin = 0;
+        #100
 
         $display( "KEYin =\t%h", k );
         $display( "PC1=\t%h", d.PC1 );
