@@ -12,3 +12,5 @@ work/
 *.wlf
 transcript
 
+a.out
+*.vcd
