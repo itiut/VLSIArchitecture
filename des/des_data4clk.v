@@ -11,7 +11,7 @@ module des(ck,keyin,k,datin,p,e,f);
     reg [64:1] IP1, IP2, IP3, IP4, IP5,IP6, IP7, IP8, IP9, IP10, IP11, IP12, IP13, IP14, IP15, IP16,IP17, LR, e;
 
     reg [1:0] data_state;
-    initial data_state = 2'b00;
+    initial data_state <= 2'b00;
 
     always @(posedge ck) begin
         if (keyin == 1) begin
@@ -60,37 +60,39 @@ module des(ck,keyin,k,datin,p,e,f);
                 PC1[56:1] = { PC1[29], PC1[56:30],PC1[1],PC1[28:2] };   KS01[48:1] = PC2(PC1[56:1]);
             end
         end else if (datin == 1 || data_state != 2'b00) begin
-            if (datin == 1 && data_state == 2'b00) begin
-                data_state = 2'b01;
-            end
             case (data_state)
-                2'b01: begin
-                    IP1[64:1] = { p[7],  p[15], p[23], p[31], p[39], p[47], p[55], p[63],
-                                  p[5],  p[13], p[21], p[29], p[37], p[45], p[53], p[61],
-                                  p[3],  p[11], p[19], p[27], p[35], p[43], p[51], p[59],
-                                  p[1],  p[9],  p[17], p[25], p[33], p[41], p[49], p[57],
-                                  p[8],  p[16], p[24], p[32], p[40], p[48], p[56], p[64],
-                                  p[6],  p[14], p[22], p[30], p[38], p[46], p[54], p[62],
-                                  p[4],  p[12], p[20], p[28], p[36], p[44], p[52], p[60],
-                                  p[2],  p[10], p[18], p[26], p[34], p[42], p[50], p[58] };
-                    IP2 = des1( IP1, KS01 );
-                    IP3 = des1( IP2, KS02 );
-                    IP4 = des1( IP3, KS03 );
-                    IP5 = des1( IP4, KS04 );
-                    IP6 = des1( IP5, KS05 );
-                    data_state = 2'b10;
+                2'b00: begin
+                    if (datin == 1) begin
+                        IP1[64:1] = { p[7],  p[15], p[23], p[31], p[39], p[47], p[55], p[63],
+                                      p[5],  p[13], p[21], p[29], p[37], p[45], p[53], p[61],
+                                      p[3],  p[11], p[19], p[27], p[35], p[43], p[51], p[59],
+                                      p[1],  p[9],  p[17], p[25], p[33], p[41], p[49], p[57],
+                                      p[8],  p[16], p[24], p[32], p[40], p[48], p[56], p[64],
+                                      p[6],  p[14], p[22], p[30], p[38], p[46], p[54], p[62],
+                                      p[4],  p[12], p[20], p[28], p[36], p[44], p[52], p[60],
+                                      p[2],  p[10], p[18], p[26], p[34], p[42], p[50], p[58] };
+                        IP2 = des1( IP1, KS01 );
+                        IP3 = des1( IP2, KS02 );
+                        IP4 = des1( IP3, KS03 );
+                        IP5 = des1( IP4, KS04 );
+                        data_state <= 2'b01;
+                    end
                 end
-                2'b10: begin
+                2'b01: begin
+                    IP6 = des1( IP5, KS05 );
                     IP7 = des1( IP6, KS06 );
                     IP8 = des1( IP7, KS07 );
                     IP9 = des1( IP8, KS08 );
+                    data_state <= 2'b10;
+                end
+                2'b10: begin
                     IP10 = des1( IP9, KS09 );
                     IP11 = des1( IP10, KS10 );
                     IP12 = des1( IP11, KS11 );
-                    data_state = 2'b11;
+                    IP13 = des1( IP12, KS12 );
+                    data_state <= 2'b11;
                 end
                 2'b11: begin
-                    IP13 = des1( IP12, KS12 );
                     IP14 = des1( IP13, KS13 );
                     IP15 = des1( IP14, KS14 );
                     IP16 = des1( IP15, KS15 );
@@ -106,7 +108,7 @@ module des(ck,keyin,k,datin,p,e,f);
                           LR[30], LR[62], LR[22], LR[54], LR[14], LR[46], LR[6], LR[38],
                           LR[31], LR[63], LR[23], LR[55], LR[15], LR[47], LR[7], LR[39],
                           LR[32], LR[64], LR[24], LR[56], LR[16], LR[48], LR[8], LR[40] };
-                    data_state = 2'b00;
+                    data_state <= 2'b00;
                 end
             endcase
         end

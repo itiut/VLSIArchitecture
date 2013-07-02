@@ -14,3 +14,7 @@ transcript
 
 a.out
 *.vcd
+*.svf
+*.log
+*_out.v
+

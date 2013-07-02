@@ -10,8 +10,8 @@ module des(ck,keyin,k,datin,p,e,f);
     reg [56:1] PC1, CD1;
     reg [64:1] IP1, IP2, IP3, IP4, IP5,IP6, IP7, IP8, IP9, IP10, IP11, IP12, IP13, IP14, IP15, IP16,IP17, LR, e;
 
-    reg [1:0] data_state;
-    initial data_state = 2'b00;
+    reg [2:0] data_state;
+    initial data_state = 3'b000;
 
     always @(posedge ck) begin
         if (keyin == 1) begin
@@ -59,12 +59,12 @@ module des(ck,keyin,k,datin,p,e,f);
                 PC1[56:1] = { PC1[30:29], PC1[56:31],PC1[2:1],PC1[28:3] };  KS02[48:1] = PC2(PC1[56:1]);
                 PC1[56:1] = { PC1[29], PC1[56:30],PC1[1],PC1[28:2] };   KS01[48:1] = PC2(PC1[56:1]);
             end
-        end else if (datin == 1 || data_state != 2'b00) begin
-            if (datin == 1 && data_state == 2'b00) begin
-                data_state = 2'b01;
+        end else if (datin == 1 || data_state != 3'b000) begin
+            if (datin == 1 && data_state == 3'b000) begin
+                data_state = 3'b001;
             end
             case (data_state)
-                2'b01: begin
+                3'b001: begin
                     IP1[64:1] = { p[7],  p[15], p[23], p[31], p[39], p[47], p[55], p[63],
                                   p[5],  p[13], p[21], p[29], p[37], p[45], p[53], p[61],
                                   p[3],  p[11], p[19], p[27], p[35], p[43], p[51], p[59],
@@ -75,24 +75,33 @@ module des(ck,keyin,k,datin,p,e,f);
                                   p[2],  p[10], p[18], p[26], p[34], p[42], p[50], p[58] };
                     IP2 = des1( IP1, KS01 );
                     IP3 = des1( IP2, KS02 );
+                    data_state = 3'b010;
+                end
+                3'b010: begin
                     IP4 = des1( IP3, KS03 );
                     IP5 = des1( IP4, KS04 );
                     IP6 = des1( IP5, KS05 );
-                    data_state = 2'b10;
+                    data_state = 3'b011;
                 end
-                2'b10: begin
+                3'b011: begin
                     IP7 = des1( IP6, KS06 );
                     IP8 = des1( IP7, KS07 );
                     IP9 = des1( IP8, KS08 );
+                    data_state = 3'b100;
+                end
+                3'b100: begin
                     IP10 = des1( IP9, KS09 );
                     IP11 = des1( IP10, KS10 );
                     IP12 = des1( IP11, KS11 );
-                    data_state = 2'b11;
+                    data_state = 3'b101;
                 end
-                2'b11: begin
+                3'b101: begin
                     IP13 = des1( IP12, KS12 );
                     IP14 = des1( IP13, KS13 );
                     IP15 = des1( IP14, KS14 );
+                    data_state = 3'b110;
+                end
+                3'b110: begin
                     IP16 = des1( IP15, KS15 );
                     IP17 = des1( IP16, KS16 );
                     LR = {IP17[32:1], IP17[64:33]};
@@ -106,8 +115,10 @@ module des(ck,keyin,k,datin,p,e,f);
                           LR[30], LR[62], LR[22], LR[54], LR[14], LR[46], LR[6], LR[38],
                           LR[31], LR[63], LR[23], LR[55], LR[15], LR[47], LR[7], LR[39],
                           LR[32], LR[64], LR[24], LR[56], LR[16], LR[48], LR[8], LR[40] };
-                    data_state = 2'b00;
+                    data_state = 3'b000;
                 end
+//                 3'b111: begin
+//                 end
             endcase
         end
     end
