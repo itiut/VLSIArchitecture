@@ -9,6 +9,7 @@ work/
 *.qsf
 *.qws
 *.mti
+*.mpf
 *.wlf
 transcript
 
@@ -17,4 +18,3 @@ a.out
 *.svf
 *.log
 *_out.v
-
