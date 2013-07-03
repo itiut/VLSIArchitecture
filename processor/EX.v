@@ -47,26 +47,29 @@ module EX(input clk_i,
 
     wire [31:0] _a;
     wire [31:0] _b;
+    wire [31:0] _alu_b;
     wire [31:0] _alu;
     wire _alu_zero;
     wire _alu_sign;
     wire _alu_do_branch;
 
-    assign _a = alu_a(IDEX_a_i,
-                      _forward_a,
-                      EXMEM_alu_o,
-                      WB_reg_write_data_i);
-    assign _b = alu_b(IDEX_b_i,
-                      _imm_dpl,
-                      IDEX_ctrl_alu_src_i,
-                      _forward_b,
-                      EXMEM_alu_o,
-                      WB_reg_write_data_i);
+    assign _a = forward_mux(IDEX_a_i,
+                            _forward_a,
+                            EXMEM_alu_o,
+                            WB_reg_write_data_i);
+    assign _b = forward_mux(IDEX_b_i,
+                            _forward_b,
+                            EXMEM_alu_o,
+                            WB_reg_write_data_i);
+    assign _alu_b = alu_b(_b,
+                          _imm_dpl,
+                          IDEX_ctrl_alu_src_i);
+
     assign _alu = (_op == `OP_LUI) ? (_imm_dpl << 16) :
                   (_op == `OP_JAL) ? IDEX_pc_i :
                   alu(alu_ctrl(_op, _aux),
                       _a,
-                      _b,
+                      _alu_b,
                       _shift);
     assign _alu_zero = ~|_alu;
     assign _alu_sign = _alu[31];
@@ -112,7 +115,7 @@ module EX(input clk_i,
             EXMEM_pc_branch_o <= _pc_branch;
             EXMEM_alu_o <= _alu;
             EXMEM_alu_do_branch_o <= _alu_do_branch;
-            EXMEM_b_o <= IDEX_b_i;
+            EXMEM_b_o <= _b;
             EXMEM_reg_write_address_o <= _reg_write_address;
             EXMEM_ctrl_branch_o <= IDEX_ctrl_branch_i;
             EXMEM_ctrl_mem_read_o <= IDEX_ctrl_mem_read_i;
@@ -151,15 +154,15 @@ module EX(input clk_i,
         endcase
     endfunction
 
-    function [31:0] alu_a;
-        input [31:0] IDEX_a;
-        input [1:0] forward_a;
+    function [31:0] forward_mux;
+        input [1:0] forward;
+        input [31:0] EX_data;
         input [31:0] MEM_reg_write_data;
         input [31:0] WB_reg_write_data;
-        case (forward_a)
-            `FORWARD_MEM: alu_a = MEM_reg_write_data;
-            `FORWARD_WB:  alu_a = WB_reg_write_data;
-            default:      alu_a = IDEX_a;
+        case (forward)
+            `FORWARD_MEM: forward_mux = MEM_reg_write_data;
+            `FORWARD_WB:  forward_mux = WB_reg_write_data;
+            default:      forward_mux = EX_data;
         endcase
     endfunction
 
@@ -167,20 +170,11 @@ module EX(input clk_i,
         input [31:0] IDEX_b;
         input [31:0] imm_dpl;
         input ctrl_alu_src;
-        input [1:0] forward_b;
-        input [31:0] MEM_reg_write_data;
-        input [31:0] WB_reg_write_data;
-        case (forward_b)
-            `FORWARD_MEM: alu_b = MEM_reg_write_data;
-            `FORWARD_WB:  alu_b = WB_reg_write_data;
-            default: begin
-                if (ctrl_alu_src) begin
-                    alu_b = imm_dpl;
-                end else begin
-                    alu_b = IDEX_b;
-                end
-            end
-        endcase
+        if (ctrl_alu_src) begin
+            alu_b = imm_dpl;
+        end else begin
+            alu_b = IDEX_b;
+        end
     endfunction
 
     function [31:0] alu;
