@@ -4,6 +4,7 @@ module ID(input clk_i,
           input n_rst_i,
           input [31:0] IFID_pc_i,
           input [31:0] IFID_ir_i,
+          input MEM_do_branch_i,
           input [4:0] WB_reg_write_address_i,
           input [31:0] WB_reg_write_data_i,
           input WB_ctrl_reg_write_i,
@@ -77,7 +78,7 @@ module ID(input clk_i,
         end else if (clk_i) begin
             IDEX_pc_o <= IFID_pc_i;
             IDEX_ir_o <= IFID_ir_i;
-            if (ID_stall_o) begin
+            if (ID_stall_o || MEM_do_branch_i) begin
                 IDEX_ctrl_reg_dst_o <= 0;
                 IDEX_ctrl_alu_src_o <= 0;
                 IDEX_ctrl_branch_o <= 0;

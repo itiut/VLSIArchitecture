@@ -1,8 +1,8 @@
 module IF(input clk_i,
           input n_rst_i,
           input ID_stall_i,
-          input [31:0] MEM_pc_branch_i,
-          input MEM_ctrl_pc_src_i,
+          input [31:0] MEM_pc_branched_i,
+          input MEM_do_branch_i,
           output reg [31:0] IFID_pc_o,
           output reg [31:0] IFID_ir_o);
 
@@ -16,8 +16,8 @@ module IF(input clk_i,
     wire [31:0] _ins;
 
     assign _next_pc = next_pc(IFID_pc_o,
-                              MEM_pc_branch_i,
-                              MEM_ctrl_pc_src_i);
+                              MEM_pc_branched_i,
+                              MEM_do_branch_i);
     assign _next_pc_plus4 = _next_pc + 4;
     assign _ins = _ins_mem[_next_pc >> 2];
 
@@ -37,11 +37,11 @@ module IF(input clk_i,
 
     function [31:0] next_pc;
         input [31:0] pc_plus4;
-        input [31:0] pc_branch;
-        input ctrl_pc_src;
+        input [31:0] pc_branched;
+        input do_branch;
 
-        if (ctrl_pc_src) begin
-            next_pc = pc_branch;
+        if (do_branch) begin
+            next_pc = pc_branched;
         end else begin
             next_pc = pc_plus4;
         end

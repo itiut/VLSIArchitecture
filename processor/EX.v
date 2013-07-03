@@ -13,10 +13,11 @@ module EX(input clk_i,
           input [1:0] IDEX_ctrl_mem_write_i,
           input IDEX_ctrl_reg_write_i,
           input IDEX_ctrl_mem_to_reg_i,
+          input MEM_do_branch_i,
           input [4:0] WB_reg_write_address_i,
           input [31:0] WB_reg_write_data_i,
           input WB_ctrl_reg_write_i,
-          output reg [31:0] EXMEM_pc_branch_o,
+          output reg [31:0] EXMEM_pc_branched_o,
           output reg [31:0] EXMEM_alu_o,
           output reg EXMEM_alu_do_branch_o,
           output reg [31:0] EXMEM_b_o,
@@ -77,12 +78,12 @@ module EX(input clk_i,
                                           _alu_zero,
                                           _alu_sign);
 
-    wire [31:0] _pc_branch;
-    assign _pc_branch = pc_branch(_op,
-                                  IDEX_pc_i,
-                                  _imm_dpl,
-                                  _addr,
-                                  _a);
+    wire [31:0] _pc_branched;
+    assign _pc_branched = pc_branched(_op,
+                                      IDEX_pc_i,
+                                      _imm_dpl,
+                                      _addr,
+                                      _a);
 
     wire [4:0] _reg_write_address;
     assign _reg_write_address = (_op == `OP_JAL) ? 5'd31 :
@@ -101,7 +102,7 @@ module EX(input clk_i,
 
     always @(negedge n_rst_i or posedge clk_i) begin
         if (~n_rst_i) begin
-            EXMEM_pc_branch_o <= 0;
+            EXMEM_pc_branched_o <= 0;
             EXMEM_alu_o <= 0;
             EXMEM_alu_do_branch_o <= 0;
             EXMEM_b_o <= 0;
@@ -112,30 +113,38 @@ module EX(input clk_i,
             EXMEM_ctrl_reg_write_o <= 0;
             EXMEM_ctrl_mem_to_reg_o <= 0;
         end else if (clk_i) begin
-            EXMEM_pc_branch_o <= _pc_branch;
+            EXMEM_pc_branched_o <= _pc_branched;
             EXMEM_alu_o <= _alu;
             EXMEM_alu_do_branch_o <= _alu_do_branch;
             EXMEM_b_o <= _b;
             EXMEM_reg_write_address_o <= _reg_write_address;
-            EXMEM_ctrl_branch_o <= IDEX_ctrl_branch_i;
-            EXMEM_ctrl_mem_read_o <= IDEX_ctrl_mem_read_i;
-            EXMEM_ctrl_mem_write_o <= IDEX_ctrl_mem_write_i;
-            EXMEM_ctrl_reg_write_o <= IDEX_ctrl_reg_write_i;
-            EXMEM_ctrl_mem_to_reg_o <= IDEX_ctrl_mem_to_reg_i;
+            if (MEM_do_branch_i) begin
+                EXMEM_ctrl_branch_o <= 0;
+                EXMEM_ctrl_mem_read_o <= 0;
+                EXMEM_ctrl_mem_write_o <= 0;
+                EXMEM_ctrl_reg_write_o <= 0;
+                EXMEM_ctrl_mem_to_reg_o <= 0;
+            end else begin
+                EXMEM_ctrl_branch_o <= IDEX_ctrl_branch_i;
+                EXMEM_ctrl_mem_read_o <= IDEX_ctrl_mem_read_i;
+                EXMEM_ctrl_mem_write_o <= IDEX_ctrl_mem_write_i;
+                EXMEM_ctrl_reg_write_o <= IDEX_ctrl_reg_write_i;
+                EXMEM_ctrl_mem_to_reg_o <= IDEX_ctrl_mem_to_reg_i;
+            end
         end
     end
 
-    function [31:0] pc_branch;
+    function [31:0] pc_branched;
         input [5:0] op;
         input [31:0] pc;
         input [31:0] imm_dpl;
         input [25:0] addr;
         input [31:0] a;
         case (op)
-            `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BLE: pc_branch = pc + (imm_dpl << 2);
-            `OP_J, `OP_JAL: pc_branch = {6'b0, addr};
-            `OP_JR: pc_branch = a;
-            default: pc_branch = pc;
+            `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BLE: pc_branched = pc + (imm_dpl << 2);
+            `OP_J, `OP_JAL: pc_branched = {6'b0, addr};
+            `OP_JR: pc_branched = a;
+            default: pc_branched = pc;
         endcase
     endfunction
 

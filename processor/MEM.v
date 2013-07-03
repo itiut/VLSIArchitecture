@@ -2,7 +2,7 @@
 
 module MEM(input clk_i,
            input n_rst_i,
-           input [31:0] EXMEM_pc_branch_i,
+           input [31:0] EXMEM_pc_branched_i,
            input [31:0] EXMEM_alu_i,
            input EXMEM_alu_do_branch_i,
            input [31:0] EXMEM_b_i,
@@ -17,11 +17,11 @@ module MEM(input clk_i,
            output reg [4:0] MEMWB_reg_write_address_o,
            output reg MEMWB_ctrl_reg_write_o,
            output reg MEMWB_ctrl_mem_to_reg_o,
-           output [31:0] MEM_pc_branch_o,
-           output MEM_ctrl_pc_src_o);
+           output [31:0] MEM_pc_branched_o,
+           output MEM_do_branch_o);
 
-    assign MEM_pc_branch_o = EXMEM_pc_branch_i;
-    assign MEM_ctrl_pc_src_o = (EXMEM_ctrl_branch_i & EXMEM_alu_do_branch_i);
+    assign MEM_pc_branched_o = EXMEM_pc_branch_i;
+    assign MEM_do_branch_o = (EXMEM_ctrl_branch_i & EXMEM_alu_do_branch_i);
 
     wire [31:0] _mem_read_data;
 
