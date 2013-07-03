@@ -20,7 +20,7 @@ module MEM(input clk_i,
            output [31:0] MEM_pc_branched_o,
            output MEM_do_branch_o);
 
-    assign MEM_pc_branched_o = EXMEM_pc_branch_i;
+    assign MEM_pc_branched_o = EXMEM_pc_branched_i;
     assign MEM_do_branch_o = (EXMEM_ctrl_branch_i & EXMEM_alu_do_branch_i);
 
     wire [31:0] _mem_read_data;

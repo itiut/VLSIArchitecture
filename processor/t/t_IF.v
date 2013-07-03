@@ -20,8 +20,9 @@ module t_IF;
 
     IF IF(.clk_i(clk),
           .n_rst_i(n_rst),
-          .MEM_pc_branch_i(32'b0),
-          .MEM_ctrl_pc_src_i(1'b0),
+          .ID_stall_i(1'b0),
+          .MEM_pc_branched_i(32'b0),
+          .MEM_do_branch_i(1'b0),
           .IFID_pc_o(pc),
           .IFID_ir_o(ir));
 
