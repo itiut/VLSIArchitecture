@@ -6,7 +6,7 @@ module MEM(input clk_i,
            input [31:0] EXMEM_alu_i,
            input EXMEM_alu_do_branch_i,
            input [31:0] EXMEM_b_i,
-           input [4:0] EXMEM_rd_i,
+           input [4:0] EXMEM_reg_write_address_i,
            input EXMEM_ctrl_branch_i,
            input [1:0] EXMEM_ctrl_mem_read_i,
            input [1:0] EXMEM_ctrl_mem_write_i,
@@ -14,7 +14,7 @@ module MEM(input clk_i,
            input EXMEM_ctrl_mem_to_reg_i,
            output reg [31:0] MEMWB_mem_o,
            output reg [31:0] MEMWB_alu_o,
-           output reg [4:0] MEMWB_rd_o,
+           output reg [4:0] MEMWB_reg_write_address_o,
            output reg MEMWB_ctrl_reg_write_o,
            output reg MEMWB_ctrl_mem_to_reg_o,
            output [31:0] MEM_pc_branch_o,
@@ -35,12 +35,12 @@ module MEM(input clk_i,
         if (~n_rst_i) begin
             MEMWB_alu_o <= 0;
             MEMWB_mem_o <= 0;
-            MEMWB_rd_o <= 0;
+            MEMWB_reg_write_address_o <= 0;
             MEMWB_ctrl_reg_write_o <= 0;
             MEMWB_ctrl_mem_to_reg_o <= 0;
         end else if (clk_i) begin
             MEMWB_alu_o <= EXMEM_alu_i;
-            MEMWB_rd_o <= EXMEM_rd_i;
+            MEMWB_reg_write_address_o <= EXMEM_reg_write_address_i;
             MEMWB_ctrl_reg_write_o <= EXMEM_ctrl_reg_write_i;
             MEMWB_ctrl_mem_to_reg_o <= EXMEM_ctrl_mem_to_reg_i;
         end

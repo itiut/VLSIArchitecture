@@ -47,3 +47,11 @@
 `define WORD     2'b11
 `define HALFWORD 2'b10
 `define BYTE     2'b01
+
+
+/**
+ * forwarding bits
+ */
+`define FORWARD_NONE 2'b00
+`define FORWARD_MEM  2'b10
+`define FORWARD_WB   2'b01
