@@ -17,7 +17,8 @@ module ID(input clk_i,
           output reg [1:0] IDEX_ctrl_mem_read_o,  // word, half-word, byte
           output reg [1:0] IDEX_ctrl_mem_write_o, // word, half-word, byte
           output reg IDEX_ctrl_reg_write_o,
-          output reg IDEX_ctrl_mem_to_reg_o);
+          output reg IDEX_ctrl_mem_to_reg_o,
+          output ID_stall_o);
 
     wire [4:0] _rs;
     wire [4:0] _rt;
@@ -54,6 +55,12 @@ module ID(input clk_i,
                               .reg_write_o(_ctrl_reg_write),
                               .mem_to_reg_o(_ctrl_mem_to_reg));
 
+    hazard_unit hazard_unit(.EX_ctrl_mem_read_i(IDEX_ctrl_mem_read_o),
+                            .EX_rt_i(IDEX_ir_o[20:16]),
+                            .ID_rs_i(_rs),
+                            .ID_rt_i(_rt),
+                            .stall_o(ID_stall_o));
+
     always @(negedge n_rst_i or posedge clk_i) begin
         if (~n_rst_i) begin
             IDEX_pc_o <= 0;
@@ -70,13 +77,23 @@ module ID(input clk_i,
         end else if (clk_i) begin
             IDEX_pc_o <= IFID_pc_i;
             IDEX_ir_o <= IFID_ir_i;
-            IDEX_ctrl_reg_dst_o <= _ctrl_reg_dst;
-            IDEX_ctrl_alu_src_o <= _ctrl_alu_src;
-            IDEX_ctrl_branch_o <= _ctrl_branch;
-            IDEX_ctrl_mem_read_o <= _ctrl_mem_read;
-            IDEX_ctrl_mem_write_o <= _ctrl_mem_write;
-            IDEX_ctrl_reg_write_o <= _ctrl_reg_write;
-            IDEX_ctrl_mem_to_reg_o <= _ctrl_mem_to_reg;
+            if (ID_stall_o) begin
+                IDEX_ctrl_reg_dst_o <= 0;
+                IDEX_ctrl_alu_src_o <= 0;
+                IDEX_ctrl_branch_o <= 0;
+                IDEX_ctrl_mem_read_o <= 0;
+                IDEX_ctrl_mem_write_o <= 0;
+                IDEX_ctrl_reg_write_o <= 0;
+                IDEX_ctrl_mem_to_reg_o <= 0;
+            end else begin
+                IDEX_ctrl_reg_dst_o <= _ctrl_reg_dst;
+                IDEX_ctrl_alu_src_o <= _ctrl_alu_src;
+                IDEX_ctrl_branch_o <= _ctrl_branch;
+                IDEX_ctrl_mem_read_o <= _ctrl_mem_read;
+                IDEX_ctrl_mem_write_o <= _ctrl_mem_write;
+                IDEX_ctrl_reg_write_o <= _ctrl_reg_write;
+                IDEX_ctrl_mem_to_reg_o <= _ctrl_mem_to_reg;
+            end
         end
     end
 
@@ -159,7 +176,7 @@ module control_unit(input [31:0] ir_i,
             `OP_LW: mem_read = `WORD;
             `OP_LH: mem_read = `HALFWORD;
             `OP_LB: mem_read = `BYTE;
-            default: mem_read = 0;
+            default: mem_read = `MEM_NONE;
         endcase
     endfunction
 
@@ -169,7 +186,7 @@ module control_unit(input [31:0] ir_i,
             `OP_SW: mem_write = `WORD;
             `OP_SH: mem_write = `HALFWORD;
             `OP_SB: mem_write = `BYTE;
-            default: mem_write = 0;
+            default: mem_write = `MEM_NONE;
         endcase
     endfunction
 
@@ -189,5 +206,16 @@ module control_unit(input [31:0] ir_i,
             default: mem_to_reg = 0;
         endcase
     endfunction
+
+endmodule
+
+module hazard_unit(input [1:0] EX_ctrl_mem_read_i,
+                   input [4:0] EX_rt_i,
+                   input [4:0] ID_rs_i,
+                   input [4:0] ID_rt_i,
+                   output stall_o);
+
+    assign stall_o = EX_ctrl_mem_read_i != `MEM_NONE
+                     && (EX_rt_i == ID_rs_i || EX_rt_i == ID_rt_i);
 
 endmodule

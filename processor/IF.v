@@ -1,5 +1,6 @@
 module IF(input clk_i,
           input n_rst_i,
+          input ID_stall_i,
           input [31:0] MEM_pc_branch_i,
           input MEM_ctrl_pc_src_i,
           output reg [31:0] IFID_pc_o,
@@ -27,8 +28,10 @@ module IF(input clk_i,
             IFID_ir_o <= 0;
         end else if (clk_i) begin
             _pc <= _next_pc;
-            IFID_pc_o <= _next_pc_plus4;
-            IFID_ir_o <= _ins;
+            if (~ID_stall_i) begin
+                IFID_pc_o <= _next_pc_plus4;
+                IFID_ir_o <= _ins;
+            end
         end
     end
 
