@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-$OSBitSize = 32;
+$OSBitSize = 64;
 
 use Switch;
 
@@ -173,25 +173,25 @@ while ($line = <FH>) {
         case "beq" {
             p_b(6, 32);
             p_r2i($f2, $f3);
-            p_b(16, $labels{$4} - $i - 1);
+            p_b(16, $labels{$f4} - $i - 1);
             print("\n");
         }
         case "bne" {
             p_b(6, 33);
             p_r2i($f2, $f3);
-            p_b(16, $labels{$4} - $i - 1);
+            p_b(16, $labels{$f4} - $i - 1);
             print("\n");
         }
         case "blt" {
             p_b(6, 34);
             p_r2i($f2, $f3);
-            p_b(16, $labels{$4} - $i - 1);
+            p_b(16, $labels{$f4} - $i - 1);
             print("\n");
         }
         case "ble" {
             p_b(6, 35);
             p_r2i($f2, $f3);
-            p_b(16, $labels{$4} - $i - 1);
+            p_b(16, $labels{$f4} - $i - 1);
             print("\n");
         }
         case "j" {
@@ -210,15 +210,8 @@ while ($line = <FH>) {
             p_b(11, 0);
             print("\n");
         }
-        # Add command "divi"
-        case "divi" {
-            p_b(6, 8);
-            p_r2i($f2, $f3);
-            p_b(16, $f4);
-            print("\n");
-        }
         else {
-            print("ERROR: Illegal Instruction\n");
+            print("ERROR: Illegal Instruction\n", $op, "\n");
         }
     }
     $i++;
