@@ -224,7 +224,7 @@ sub p_b {
     if ($num >= 0) {
         printf("%0" . $digits ."b_", $num);
     } else {
-        print(substr(sprintf("%b ",$num), $OSBitSize - $digits));
+        print(substr(sprintf("%b_",$num), $OSBitSize - $digits));
     }
 }
 
