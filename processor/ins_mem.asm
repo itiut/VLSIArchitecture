@@ -4,11 +4,12 @@
         addi r4, r0, 4
         addi r5, r0, 5
         addi r6, r0, 6
+        addi r7, r0, 7
         addi r9, r0, 9
         addi r12, r0, 12
         addi r14, r0, 14
         addi r15, r0, 15
-        addi r19, r0, 19
+        add r19, r7, r12
 label5: addi r30, r0, 30
 label1: sub r7, r4, r6
         lui r8, 12
