@@ -124,7 +124,6 @@ module register(input clk_i,
         _regs[0] <= 0;
     end
 
-    // TODO: neg or pos clk?
     always @(negedge clk_i) begin
         if (ctrl_reg_write_i) begin
             _regs[write_address_i] <= write_data_i;

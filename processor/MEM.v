@@ -64,7 +64,6 @@ module memory(input clk_i,
 
     assign read_data_o = read(_mem[address_i], ctrl_mem_read_i);
 
-    // TODO: neg or pos clk?
     always @(negedge clk_i) begin
         case (ctrl_mem_write_i)
             `WORD: _mem[address_i] <= write_data_i;
