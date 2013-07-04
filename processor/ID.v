@@ -78,6 +78,8 @@ module ID(input clk_i,
         end else if (clk_i) begin
             IDEX_pc_o <= IFID_pc_i;
             IDEX_ir_o <= IFID_ir_i;
+            IDEX_a_o <= _reg_read_data1;
+            IDEX_b_o <= _reg_read_data2;
             if (ID_stall_o || MEM_do_branch_i) begin
                 IDEX_ctrl_reg_dst_o <= 0;
                 IDEX_ctrl_alu_src_o <= 0;
@@ -96,11 +98,6 @@ module ID(input clk_i,
                 IDEX_ctrl_mem_to_reg_o <= _ctrl_mem_to_reg;
             end
         end
-    end
-
-    always @(negedge clk_i) begin
-        IDEX_a_o <= _reg_read_data1;
-        IDEX_b_o <= _reg_read_data2;
     end
 
 endmodule
