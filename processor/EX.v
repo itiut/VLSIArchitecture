@@ -142,7 +142,7 @@ module EX(input clk_i,
         input [31:0] a;
         case (op)
             `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BLE: pc_branched = pc + (imm_dpl << 2);
-            `OP_J, `OP_JAL: pc_branched = {6'b0, addr};
+            `OP_J, `OP_JAL: pc_branched = {4'b0, addr << 2};
             `OP_JR: pc_branched = a;
             default: pc_branched = pc;
         endcase
