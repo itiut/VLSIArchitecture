@@ -34,21 +34,18 @@ module MEM(input clk_i,
 
     always @(negedge n_rst_i or posedge clk_i) begin
         if (~n_rst_i) begin
-            MEMWB_alu_o <= 0;
             MEMWB_mem_o <= 0;
+            MEMWB_alu_o <= 0;
             MEMWB_reg_write_address_o <= 0;
             MEMWB_ctrl_reg_write_o <= 0;
             MEMWB_ctrl_mem_to_reg_o <= 0;
         end else if (clk_i) begin
+            MEMWB_mem_o <= _mem_read_data;
             MEMWB_alu_o <= EXMEM_alu_i;
             MEMWB_reg_write_address_o <= EXMEM_reg_write_address_i;
             MEMWB_ctrl_reg_write_o <= EXMEM_ctrl_reg_write_i;
             MEMWB_ctrl_mem_to_reg_o <= EXMEM_ctrl_mem_to_reg_i;
         end
-    end
-
-    always @(negedge clk_i) begin
-        MEMWB_mem_o <= _mem_read_data;
     end
 
 endmodule
