@@ -39,7 +39,6 @@ module IF(input clk_i,
         input [31:0] pc_plus4;
         input [31:0] pc_branched;
         input do_branch;
-
         if (do_branch) begin
             next_pc = pc_branched;
         end else begin
