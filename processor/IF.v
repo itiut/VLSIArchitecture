@@ -25,7 +25,7 @@ module IF(input clk_i,
         if (~n_rst_i) begin
             _pc <= 0;
             IFID_pc_o <= 0;
-            IFID_ir_o <= 0;
+            IFID_ir_o <= 32'hxxxxxxxx;
         end else if (clk_i) begin
             _pc <= _next_pc;
             if (~ID_stall_i) begin
