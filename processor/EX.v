@@ -55,13 +55,13 @@ module EX(input clk_i,
     wire _alu_do_branch;
 
     assign _a = forward_mux(IDEX_a_i,
-                            _forward_a,
                             EXMEM_alu_o,
-                            WB_reg_write_data_i);
+                            WB_reg_write_data_i,
+                            _forward_a);
     assign _b = forward_mux(IDEX_b_i,
-                            _forward_b,
                             EXMEM_alu_o,
-                            WB_reg_write_data_i);
+                            WB_reg_write_data_i,
+                            _forward_b);
     assign _alu_b = alu_b(_b,
                           _imm_dpl,
                           IDEX_ctrl_alu_src_i);
@@ -164,10 +164,10 @@ module EX(input clk_i,
     endfunction
 
     function [31:0] forward_mux;
-        input [1:0] forward;
         input [31:0] EX_data;
         input [31:0] MEM_reg_write_data;
         input [31:0] WB_reg_write_data;
+        input [1:0] forward;
         case (forward)
             `FORWARD_MEM: forward_mux = MEM_reg_write_data;
             `FORWARD_WB:  forward_mux = WB_reg_write_data;
