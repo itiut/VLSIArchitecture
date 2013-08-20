@@ -87,17 +87,17 @@ module des(ck,keyin,k,datin,p,e,f);
                            p[2],  p[10], p[18], p[26], p[34], p[42], p[50], p[58] };
         end
         if (data_state[1]) begin
-            IP2 <= des1( IP1, KS01 );
+            IP2 = des1( IP1, KS01 );
             IP3 = des1( IP2, KS02 );
             IP4 = des1( IP3, KS03 );
             IP5 = des1( IP4, KS04 );
             IP6 = des1( IP5, KS05 );
             IP7 = des1( IP6, KS06 );
             IP8 = des1( IP7, KS07 );
-            IP9 = des1( IP8, KS08 );
+            IP9 <= des1( IP8, KS08 );
         end
         if (data_state[2]) begin
-            IP10 <= des1( IP9, KS09 );
+            IP10 = des1( IP9, KS09 );
             IP11 = des1( IP10, KS10 );
             IP12 = des1( IP11, KS11 );
             IP13 = des1( IP12, KS12 );
@@ -105,7 +105,7 @@ module des(ck,keyin,k,datin,p,e,f);
             IP15 = des1( IP14, KS14 );
             IP16 = des1( IP15, KS15 );
             IP17 = des1( IP16, KS16 );
-            LR = {IP17[32:1], IP17[64:33]};
+            LR <= {IP17[32:1], IP17[64:33]};
         end
         if (data_state[3]) begin
             // R=IP1[64:33], L=IP[32:1]
