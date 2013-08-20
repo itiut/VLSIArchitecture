@@ -14,9 +14,10 @@ module des(ck,keyin,k,datin,p,e,f);
     reg [3:0] data_state;
 
     always @(posedge ck) begin
+        key_state = key_state + 1;
         data_state = data_state << 1;
         if (keyin == 1) begin
-            key_state <= 2'b01;
+            key_state = 2'b01;
         end else if (datin == 1) begin
             data_state[0] = 1'b1;
         end
@@ -51,7 +52,6 @@ module des(ck,keyin,k,datin,p,e,f);
                     PC1[56:1] = { PC1[30:29], PC1[56:31],PC1[2:1],PC1[28:3] };  KS10[48:1] = PC2(PC1[56:1]);
                     PC1[56:1] = { PC1[30:29], PC1[56:31],PC1[2:1],PC1[28:3] };  KS09[48:1] = PC2(PC1[56:1]);
                 end
-                key_state <= 2'b01;
             end
             2'b10: begin
                 if (f == 1) begin
@@ -73,7 +73,6 @@ module des(ck,keyin,k,datin,p,e,f);
                     PC1[56:1] = { PC1[30:29], PC1[56:31],PC1[2:1],PC1[28:3] };  KS02[48:1] = PC2(PC1[56:1]);
                     PC1[56:1] = { PC1[29], PC1[56:30],PC1[1],PC1[28:2] };   KS01[48:1] = PC2(PC1[56:1]);
                 end
-                key_state <= 2'b00;
             end
         endcase
 
